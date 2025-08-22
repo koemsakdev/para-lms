@@ -1,6 +1,7 @@
 import {Layers} from "lucide-react";
 import {IconBadge} from "@/components/icon-badge";
-import {TitleForm} from "@/app/(dashboard)/_components/title-form";
+import {TitleForm} from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/title-form";
+import {DescriptionForm} from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/description-form";
 
 const CourseIdPage = async (
     { params }: { params: Promise<{ courseId: string }> }
@@ -9,7 +10,7 @@ const CourseIdPage = async (
     const course = {
         id: courseId,
         title: "Course Title",
-        description: "Course Description",
+        description: "",
     };
     return (
         <div>
@@ -28,6 +29,7 @@ const CourseIdPage = async (
                         <h2 className={"text-lg"}>Customize your course.</h2>
                     </div>
                     <TitleForm initialData={course} courseId={courseId} />
+                    <DescriptionForm initialData={course} courseId={courseId} />
                 </div>
             </div>
         </div>

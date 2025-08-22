@@ -1,17 +1,23 @@
 "use client"
 
-import Image from "next/image";
-import {cn} from "@/lib/utils"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
+import {z} from "zod";
 import Link from "next/link";
+import {cn} from "@/lib/utils"
+import Image from "next/image";
 import React, {useState} from "react";
+import {useForm} from "react-hook-form";
+import {useRouter} from "next/navigation";
+import {useToast} from "@/hooks/useToast";
+import {Label} from "@/components/ui/label"
+import {Input} from "@/components/ui/input"
+import {Button} from "@/components/ui/button"
+import {registerSchema} from "@/app/(auth)/schema";
+import {zodResolver} from "@hookform/resolvers/zod";
+
 
 import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
-
-import {Eye, EyeOff, Loader, Loader2} from "lucide-react";
+import {Eye, EyeOff, Loader} from "lucide-react";
 
 import {
     Form,
@@ -20,12 +26,8 @@ import {
     FormItem,
     FormMessage,
 } from "@/components/ui/form";
-import {useForm} from "react-hook-form";
-import {registerSchema} from "@/app/(auth)/schema";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {z} from "zod";
-import {useToast} from "@/hooks/useToast";
-import {useRouter} from "next/navigation";
+import authClient from "@/lib/auth-client";
+
 
 export function RegisterForm({
        className,
@@ -41,7 +43,7 @@ export function RegisterForm({
             firstName: "",
             lastName: "",
             email: "",
-            password: "",
+            password: ""
         },
     });
 
@@ -49,28 +51,31 @@ export function RegisterForm({
 
     const onSubmit = async (data: z.infer<typeof registerSchema>) => {
         try {
-            const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            await authClient.signUp.email(
+                {
+                    name: `${data.firstName} ${data.lastName}`,
+                    email: data.email,
+                    password: data.password,
                 },
-                body: JSON.stringify(data),
-            });
-            const result = await response.json();
-            if (response.ok) {
-                showToast(
-                    "Success",
-                    result.message || "Signed in successfully",
-                    "success"
-                );
-                router.push("/");
-            } else {
-                showToast(
-                    "Error",
-                    result.message || "An unexpected error occurred",
-                    "error"
-                )
-            }
+                {
+                    onSuccess: (ctx) => {
+                        showToast(
+                            "Success",
+                            "Account created successfully",
+                            "success"
+                        );
+
+                        router.push("/");
+                    },
+                    onError: (ctx) => {
+                        showToast(
+                            "Error",
+                            ctx.error.message || "An unexpected error occurred",
+                            "error"
+                        )
+                    },
+                }
+            )
         } catch (error) {
             showToast(
                 "Error",

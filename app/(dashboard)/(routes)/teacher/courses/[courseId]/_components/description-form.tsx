@@ -1,30 +1,31 @@
 "use client";
 
 import {z} from "zod";
+import axios from "axios";
 import {useState} from "react";
+import {cn} from "@/lib/utils";
 import {useForm} from "react-hook-form";
 import {useToast} from "@/hooks/useToast";
-import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Loader2, Pencil, X} from "lucide-react";
 import {zodResolver} from "@hookform/resolvers/zod";
+import {Textarea} from "@/components/ui/textarea";
 import {Form, FormControl, FormField, FormItem, FormMessage} from "@/components/ui/form";
-import axios from "axios";
 
-interface TitleFormProps {
+interface DescriptionFormProps {
     initialData: {
-        title: string;
+        description: string;
     };
     courseId: string;
 }
 
 const formSchema = z.object({
-    title: z.string().min(1, {
-        message: "Title is required",
+    description: z.string().min(1, {
+        message: "Description is required",
     }),
 });
 
-export const TitleForm = ({initialData, courseId}: TitleFormProps) => {
+export const DescriptionForm = ({initialData, courseId}: DescriptionFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const {showToast} = useToast();
 
@@ -43,14 +44,14 @@ export const TitleForm = ({initialData, courseId}: TitleFormProps) => {
             if (response.ok) {
                 showToast(
                     "Success",
-                    "Course title updated successfully",
+                    "Course description updated successfully",
                     "success"
                 );
                 setIsEditing(false);
             } else {
                 showToast(
                     "Error",
-                    "Failed to update course title",
+                    "Failed to update course description",
                     "error"
                 );
             }
@@ -66,7 +67,7 @@ export const TitleForm = ({initialData, courseId}: TitleFormProps) => {
     return (
         <div className={"mt-6 border border-slate-100 p-4 rounded-xs"}>
             <div className={"font-medium flex items-center justify-between"}>
-                Course Title
+                Course Description
                 <Button className={"bg-transparent hover:bg-transparent p-0 shadow-none rounded-none"}
                         onClick={toggleEdit}>
                     {isEditing ? (
@@ -77,18 +78,18 @@ export const TitleForm = ({initialData, courseId}: TitleFormProps) => {
                 </Button>
             </div>
             {
-                isEditing && (
+                isEditing ? (
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className={"space-y-2 mt-4"}>
                             <FormField
                                 control={form.control}
-                                name={"title"}
+                                name={"description"}
                                 render={({field}) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input
+                                            <Textarea
                                                 disabled={isSubmitting}
-                                                placeholder={"e.g. Java Spring Boot"}
+                                                placeholder={"e.g. 'This course will help you...'"}
                                                 className={"w-full shadow-none rounded-xs focus:shadow-none focus-visible:shadow-none focus:outline-0 focus-visible:outline-0 focus:ring-0 focus-visible:ring-0"}
                                                 {...field}
                                             />
@@ -114,6 +115,13 @@ export const TitleForm = ({initialData, courseId}: TitleFormProps) => {
                             </div>
                         </form>
                     </Form>
+                ) : (
+                    <p className={cn(
+                        "text-sm text-slate-700",
+                        !initialData.description && "text-gray-400 text-sm italic"
+                    )}>
+                        {initialData.description || "No description provided"}
+                    </p>
                 )
             }
         </div>
